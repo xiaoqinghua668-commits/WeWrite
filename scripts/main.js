@@ -8,7 +8,6 @@ const state = {
   generatedHTML: '',
   isLoading: false,
   settingsColor:     '#07C160',
-  settingsProvider:  'doubao',
   settingsVoiceTone: '亲切温暖',
 };
 

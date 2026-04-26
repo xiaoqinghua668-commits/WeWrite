@@ -243,41 +243,6 @@
     </div>
   </div>
 
-  <!-- ── AI 接口配置 Card ── -->
-  <div class="s-card">
-    <div class="s-card-title">🔑 AI 接口配置</div>
-
-    <div class="form-group">
-      <label class="form-label">选择接口</label>
-      <div class="provider-options">
-        <div class="provider-block selected" id="provider-doubao" onclick="selectProvider('doubao')">
-          <div class="provider-icon">🤖</div>
-          <div>
-            <div class="provider-name">豆包 Vision</div>
-            <div class="provider-desc">国内访问稳定，支持中文场景</div>
-          </div>
-        </div>
-        <div class="provider-block" id="provider-claude" onclick="selectProvider('claude')">
-          <div class="provider-icon">🧠</div>
-          <div>
-            <div class="provider-name">Claude Sonnet</div>
-            <div class="provider-desc">图片理解能力强，支持复杂排版</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="form-group" style="margin-bottom:0">
-      <div class="test-row">
-        <button class="btn-test" id="test-btn" onclick="testConnection()">测试连接</button>
-        <span class="test-status" id="test-status"></span>
-      </div>
-      <div class="form-hint" style="margin-top:6px">
-        🔒 API Key 通过 Vercel 环境变量配置在服务端，不会下发到浏览器。
-      </div>
-    </div>
-  </div>
-
   <!-- ── 使用统计 Card ── -->
   <div class="s-card">
     <div class="s-card-title">📊 使用统计</div>

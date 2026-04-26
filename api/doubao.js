@@ -1,11 +1,10 @@
+const API_KEY = process.env.DOUBAO_API_KEY || 'c14f1beb-1c59-4b57-b2e4-8cb170f531f8';
+const MODEL   = 'doubao-1.5-vision-pro-250328';
+const API_URL = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: { message: 'Method not allowed' } });
-  }
-
-  const apiKey = process.env.DOUBAO_API_KEY;
-  if (!apiKey) {
-    return res.status(500).json({ error: { message: '服务端未配置 DOUBAO_API_KEY 环境变量' } });
   }
 
   const { prompt, images = [], testMode = false } = req.body;
@@ -19,14 +18,14 @@ module.exports = async function handler(req, res) {
   content.push({ type: 'text', text: testMode ? '你好，请回复「ok」' : prompt });
 
   try {
-    const upstream = await fetch('https://ark.cn-beijing.volces.com/api/v3/chat/completions', {
+    const upstream = await fetch(API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
+        'Authorization': `Bearer ${API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'doubao-1.5-vision-pro-250328',
+        model: MODEL,
         max_tokens: testMode ? 10 : 2000,
         messages: [{ role: 'user', content }],
       }),

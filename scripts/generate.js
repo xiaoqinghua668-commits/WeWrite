@@ -1,4 +1,4 @@
-async function generateWithRetry(providerType, prompt, base64List, maxRetries = 2) {
+async function generateWithRetry(prompt, base64List, maxRetries = 2) {
   let lastError;
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     if (attempt > 0) {
@@ -6,11 +6,7 @@ async function generateWithRetry(providerType, prompt, base64List, maxRetries = 
       await new Promise(r => setTimeout(r, 1500));
     }
     try {
-      if (providerType === 'claude') {
-        return await callClaude({ prompt, images: base64List });
-      } else {
-        return await callDoubao({ prompt, images: base64List });
-      }
+      return await callDoubao({ prompt, images: base64List });
     } catch (err) {
       lastError = err;
       if (err.message && (err.message.includes('401') || err.message.includes('403'))) {
@@ -24,8 +20,6 @@ async function generateWithRetry(providerType, prompt, base64List, maxRetries = 
 async function generate() {
   if (state.isLoading) return;
   if (!validateTopic()) return;
-
-  const apiCfg = loadApiConfig();
 
   state.topic   = document.getElementById('topic').value.trim();
   state.extra   = document.getElementById('extra').value.trim();
@@ -42,7 +36,7 @@ async function generate() {
   const base64List = state.images.map(img => img.base64);
 
   try {
-    const rawHtml = await generateWithRetry(apiCfg.type, prompt, base64List);
+    const rawHtml = await generateWithRetry(prompt, base64List);
     const html    = rawHtml.replace(/^```html\s*/i, '').replace(/\s*```$/i, '').trim();
 
     state.generatedHTML = html;
@@ -66,7 +60,7 @@ async function generate() {
 
   } catch (err) {
     console.error(err);
-    setStatus(`✗ 生成失败：${err.message || '网络错误'}，请检查服务端配置`, 'error');
+    setStatus(`✗ 生成失败：${err.message || '网络错误'}，请稍后重试`, 'error');
   }
 
   setLoading(false);
