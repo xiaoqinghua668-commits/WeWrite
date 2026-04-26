@@ -28,59 +28,26 @@ function selectProvider(type) {
   state.settingsProvider = type;
   document.getElementById('provider-doubao').classList.toggle('selected', type === 'doubao');
   document.getElementById('provider-claude').classList.toggle('selected', type === 'claude');
-  document.getElementById('s-api-key').placeholder =
-    type === 'claude' ? 'sk-ant-xxxxxxxxxxxxxxxxxx' : 'sk-xxxxxxxxxxxxxxxxxx';
   markUnsaved();
-}
-
-function onSettingsKeyInput(val) {
-  const trimmed = val.trim();
-  if (trimmed.startsWith('sk-ant-')) {
-    selectProvider('claude');
-  } else if (trimmed.startsWith('sk-')) {
-    selectProvider('doubao');
-  }
-  document.getElementById('test-status').textContent = '';
-  document.getElementById('test-status').className   = 'test-status';
-  markUnsaved();
-}
-
-function toggleKeyVisibility() {
-  const inp = document.getElementById('s-api-key');
-  const btn = document.getElementById('toggle-key-btn');
-  if (inp.type === 'password') {
-    inp.type = 'text';
-    btn.textContent = '隐藏';
-  } else {
-    inp.type = 'password';
-    btn.textContent = '显示';
-  }
 }
 
 async function testConnection() {
-  const key    = document.getElementById('s-api-key').value.trim();
   const status = document.getElementById('test-status');
   const btn    = document.getElementById('test-btn');
-  if (!key) {
-    status.textContent = '请先填写 API Key';
-    status.className   = 'test-status err';
-    return;
-  }
   btn.disabled    = true;
   btn.innerHTML   = '<div class="spinner-sm"></div> 测试中...';
   status.textContent = '';
   status.className   = 'test-status';
   try {
-    const type = state.settingsProvider;
-    if (type === 'claude') {
-      await callClaude({ apiKey: key, prompt: '', images: [], testMode: true });
+    if (state.settingsProvider === 'claude') {
+      await callClaude({ testMode: true });
     } else {
-      await callDoubao({ apiKey: key, prompt: '', images: [], testMode: true });
+      await callDoubao({ testMode: true });
     }
     status.textContent = '✓ 连接正常';
     status.className   = 'test-status ok';
   } catch (e) {
-    status.textContent = `✗ Key 无效或网络异常`;
+    status.textContent = `✗ ${e.message || '连接异常，请检查服务端环境变量'}`;
     status.className   = 'test-status err';
   }
   btn.disabled  = false;
@@ -114,7 +81,6 @@ function populateSettingsForm() {
 
   state.settingsProvider = apiCfg.type || 'doubao';
   selectProvider(state.settingsProvider);
-  document.getElementById('s-api-key').value = apiCfg.key || '';
 
   const history  = loadHistory();
   const today    = new Date().toDateString();
@@ -140,17 +106,11 @@ function saveSettings() {
                  .split('\n').map(l => l.trim()).filter(Boolean),
     voiceTone: state.settingsVoiceTone,
   };
-  const apiCfg = {
-    type: state.settingsProvider,
-    key:  document.getElementById('s-api-key').value.trim(),
-  };
+  const apiCfg = { type: state.settingsProvider };
 
   saveBrand(brand);
   saveApiConfig(apiCfg);
-
   syncPhoneHeader();
-
-  document.getElementById('generate-btn').disabled = !apiCfg.key;
 
   document.getElementById('unsaved-dot').classList.remove('visible');
 

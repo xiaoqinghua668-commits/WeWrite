@@ -268,20 +268,12 @@
     </div>
 
     <div class="form-group" style="margin-bottom:0">
-      <label class="form-label">API Key</label>
-      <div class="apikey-row">
-        <input type="password" id="s-api-key"
-          placeholder="sk-xxxxxxxxxxxxxxxxxx"
-          oninput="onSettingsKeyInput(this.value)">
-        <button class="btn-toggle-key" id="toggle-key-btn" onclick="toggleKeyVisibility()">显示</button>
-      </div>
       <div class="test-row">
         <button class="btn-test" id="test-btn" onclick="testConnection()">测试连接</button>
         <span class="test-status" id="test-status"></span>
       </div>
       <div class="form-hint" style="margin-top:6px">
-        🔒 API Key 仅保存在本地浏览器，不会上传到任何服务器。
-        部署到公网后，请勿将工具链接分享给他人。
+        🔒 API Key 通过 Vercel 环境变量配置在服务端，不会下发到浏览器。
       </div>
     </div>
   </div>

@@ -1,4 +1,4 @@
-async function generateWithRetry(apiCfg, prompt, base64List, maxRetries = 2) {
+async function generateWithRetry(providerType, prompt, base64List, maxRetries = 2) {
   let lastError;
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     if (attempt > 0) {
@@ -6,10 +6,10 @@ async function generateWithRetry(apiCfg, prompt, base64List, maxRetries = 2) {
       await new Promise(r => setTimeout(r, 1500));
     }
     try {
-      if (apiCfg.type === 'claude') {
-        return await callClaude({ apiKey: apiCfg.key, prompt, images: base64List });
+      if (providerType === 'claude') {
+        return await callClaude({ prompt, images: base64List });
       } else {
-        return await callDoubao({ apiKey: apiCfg.key, prompt, images: base64List });
+        return await callDoubao({ prompt, images: base64List });
       }
     } catch (err) {
       lastError = err;
@@ -26,12 +26,6 @@ async function generate() {
   if (!validateTopic()) return;
 
   const apiCfg = loadApiConfig();
-  if (!apiCfg.key) {
-    setStatus('请先前往「设置」填写 API Key', 'error');
-    document.querySelector('.nav-tab[data-tab="settings"]').click();
-    document.getElementById('s-api-key').focus();
-    return;
-  }
 
   state.topic   = document.getElementById('topic').value.trim();
   state.extra   = document.getElementById('extra').value.trim();
@@ -48,7 +42,7 @@ async function generate() {
   const base64List = state.images.map(img => img.base64);
 
   try {
-    const rawHtml = await generateWithRetry(apiCfg, prompt, base64List);
+    const rawHtml = await generateWithRetry(apiCfg.type, prompt, base64List);
     const html    = rawHtml.replace(/^```html\s*/i, '').replace(/\s*```$/i, '').trim();
 
     state.generatedHTML = html;
@@ -72,7 +66,7 @@ async function generate() {
 
   } catch (err) {
     console.error(err);
-    setStatus(`✗ 生成失败：${err.message || '网络错误'}，请检查 API Key 或网络`, 'error');
+    setStatus(`✗ 生成失败：${err.message || '网络错误'}，请检查服务端配置`, 'error');
   }
 
   setLoading(false);

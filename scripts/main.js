@@ -70,11 +70,6 @@ function initKeyboardShortcuts() {
 
 (function init() {
   syncPhoneHeader();
-  renderPreviewEmpty();
-  const apiCfg = loadApiConfig();
-  const btn    = document.getElementById('generate-btn');
-  btn.disabled = !apiCfg.key;
-  if (!apiCfg.key) btn.title = '请先在「设置」填写 API Key';
   updateNavStats();
   initUpload();
   initSettings();
