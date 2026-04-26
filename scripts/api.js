@@ -11,7 +11,7 @@ async function callDoubao({ apiKey, prompt, images, testMode = false }) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
     body: JSON.stringify({
-      model: 'doubao-1-5-vision-pro-32k',
+      model: 'doubao-1.5-vision-pro-250328',
       max_tokens: testMode ? 10 : 2000,
       messages: [{ role: 'user', content }],
     }),
