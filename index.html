@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WeWrite — 公众号图文生成工具</title>
+<link rel="stylesheet" href="styles/tokens.css">
+<link rel="stylesheet" href="styles/base.css">
+<link rel="stylesheet" href="styles/nav.css">
+<link rel="stylesheet" href="styles/create.css">
+<link rel="stylesheet" href="styles/article.css">
+<link rel="stylesheet" href="styles/settings.css">
+<link rel="stylesheet" href="styles/history.css">
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     NavBar
+═══════════════════════════════════════════ -->
+<nav class="nav">
+  <div class="nav-logo">✍️ We<em>Write</em></div>
+
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-tab="create">创作</button>
+    <button class="nav-tab"        data-tab="history">历史</button>
+    <button class="nav-tab"        data-tab="settings">设置</button>
+  </div>
+
+  <div class="nav-right">
+    <div class="stat-pill">📝 <span class="num" id="stat-today">0</span><span class="lbl">今日篇</span></div>
+    <div class="stat-pill">📚 <span class="num" id="stat-total">0</span><span class="lbl">共</span></div>
+  </div>
+</nav>
+
+
+<!-- ═══════════════════════════════════════════
+     Create Page
+═══════════════════════════════════════════ -->
+<div class="page active" id="page-create">
+  <div class="create-main">
+
+    <!-- ── Input Card ── -->
+    <div class="input-card">
+
+      <div class="form-group">
+        <label class="form-label" for="topic">文章主题</label>
+        <textarea id="topic" placeholder="例：新品上市、限时活动、招牌菜推荐..."
+          oninput="clearTopicError(this)" onblur="validateTopic()"></textarea>
+        <span id="topic-error"
+          style="display:none;font-size:11px;color:var(--error);margin-top:2px">请填写文章主题</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="extra">补充说明（可选）</label>
+        <textarea id="extra" placeholder="目标人群、核心卖点、特别要求..."></textarea>
+      </div>
+
+      <hr class="divider">
+
+      <div class="form-group">
+        <label class="form-label">文章模板</label>
+        <div class="pill-group">
+          <button class="pill-tag active" data-group="template" data-val="新品推荐">新品推荐</button>
+          <button class="pill-tag"        data-group="template" data-val="节日活动">节日活动</button>
+          <button class="pill-tag"        data-group="template" data-val="日常种草">日常种草</button>
+          <button class="pill-tag"        data-group="template" data-val="促销推广">促销推广</button>
+          <button class="pill-tag"        data-group="template" data-val="品牌故事">品牌故事</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">图片排列</label>
+        <div class="pill-group">
+          <button class="pill-tag active" data-group="layout" data-val="智能穿插">智能穿插</button>
+          <button class="pill-tag"        data-group="layout" data-val="头图优先">头图优先</button>
+          <button class="pill-tag"        data-group="layout" data-val="文末集中">文末集中</button>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">配图上传（可选，最多 6 张）</label>
+        <label class="upload-zone" id="upload-zone">
+          <input type="file" id="file-input" accept="image/*" multiple>
+          <span class="upload-icon">📷</span>
+          <span class="upload-hint">点击或拖拽上传图片</span>
+          <span class="upload-sub">JPG · PNG · WebP，最多 6 张</span>
+        </label>
+        <div class="thumb-row" id="thumb-row"></div>
+        <div class="img-desc-group form-group" id="img-desc-group" style="margin-top:8px">
+          <label class="form-label" for="img-desc">图片描述（可选）</label>
+          <textarea id="img-desc" placeholder="告诉 AI 图片内容，生成更贴切的配文..."></textarea>
+        </div>
+      </div>
+
+      <button class="btn-generate" id="generate-btn" onclick="generate()">
+        <span id="btn-text">生成文案 ↗</span>
+      </button>
+
+    </div><!-- /input-card -->
+
+    <!-- ── Preview Area ── -->
+    <div class="preview-area">
+      <div class="phone-shell">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="wx-bar">
+            <div class="wx-avatar" id="wx-avatar">W</div>
+            <div class="wx-name"   id="wx-name">我的公众号</div>
+            <div class="wx-follow">已关注</div>
+          </div>
+          <div class="preview-empty" id="preview-empty">
+            <div class="preview-empty-icon">📱</div>
+            <div class="preview-empty-text">填写主题后点击「生成文案」<br>即可看到手机预排版效果</div>
+          </div>
+          <div id="article-output">
+            <div class="art-body-wrap" id="article-body"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="copy-btns">
+        <button class="btn-copy-rich" id="copy-rich-btn" onclick="copyRichText()" disabled>
+          ✦ 一键复制富文本
+        </button>
+        <button class="btn-copy-html" id="copy-html-btn" onclick="copyHtmlSource()" disabled>
+          复制 HTML 源码
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /create-main -->
+  <div class="status-bar" id="status-bar">生成后点击黄色按钮，直接粘贴到公众号编辑器</div>
+</div><!-- /page-create -->
+
+
+<!-- ═══════════════════════════════════════════
+     History Page（Phase 3 占位）
+═══════════════════════════════════════════ -->
+<div class="page" id="page-history">
+  <div class="history-main">
+
+    <!-- 左侧列表 -->
+    <div class="history-list-card">
+      <div class="history-search-wrap">
+        <span class="history-search-icon">🔍</span>
+        <input type="text" id="history-search" placeholder="搜索文章主题或标题...">
+      </div>
+      <div class="history-scroll">
+        <div id="history-list-inner">
+          <!-- 由 renderHistoryList() 动态渲染 -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 右侧预览 -->
+    <div class="history-preview" id="history-preview-content">
+      <div class="preview-empty">
+        <div class="preview-empty-icon">📋</div>
+        <div class="preview-empty-text">点击左侧文章<br>即可预览内容</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     Settings Page
+═══════════════════════════════════════════ -->
+<div class="page" id="page-settings">
+<div class="settings-view">
+
+  <div class="settings-header">
+    <div class="settings-title">欢迎回来</div>
+    <div class="settings-sub">在这里配置你的品牌信息和 AI 接口</div>
+  </div>
+
+  <!-- ── 品牌信息 Card ── -->
+  <div class="s-card">
+    <div class="s-card-title">📣 品牌信息</div>
+
+    <div class="form-group">
+      <label class="form-label">公众号名称</label>
+      <input type="text" id="s-name" placeholder="例：烧鸟研究所、美食日记" maxlength="20" oninput="markUnsaved()">
+      <span class="form-hint">将显示在每篇文章的署名和预览头部</span>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">品牌主色（头像背景色）</label>
+      <div class="color-picker-row">
+        <button class="color-swatch selected" data-color="#07C160" style="background:#07C160"
+          onclick="selectColor('#07C160',this)" title="微信绿（默认）"></button>
+        <button class="color-swatch" data-color="#1C1C1E" style="background:#1C1C1E"
+          onclick="selectColor('#1C1C1E',this)" title="黑"></button>
+        <button class="color-swatch" data-color="#F5C518" style="background:#F5C518"
+          onclick="selectColor('#F5C518',this)" title="黄"></button>
+        <button class="color-swatch" data-color="#FF6B35" style="background:#FF6B35"
+          onclick="selectColor('#FF6B35',this)" title="橙红"></button>
+        <button class="color-swatch" data-color="#5856D6" style="background:#5856D6"
+          onclick="selectColor('#5856D6',this)" title="紫"></button>
+        <button class="color-swatch" data-color="#0A84FF" style="background:#0A84FF"
+          onclick="selectColor('#0A84FF',this)" title="蓝"></button>
+        <div class="color-custom-wrap">
+          <input type="text" id="s-color-hex" placeholder="#07C160" maxlength="7"
+            oninput="onCustomColorInput(this.value)" style="width:96px;font-size:12px;padding:6px 10px;">
+          <div class="avatar-preview" id="s-avatar-preview" style="background:#07C160">公</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">品牌口号</label>
+      <input type="text" id="s-slogan" placeholder="例：每一口都是故事" maxlength="30" oninput="markUnsaved()">
+      <span class="form-hint">可选，生成文案时作为品牌调性参考注入 Prompt</span>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">固定话术</label>
+      <textarea id="s-tone" style="height:88px"
+        placeholder="每行一条，例：&#10;到店即享 · 无需预约&#10;仅限堂食 · 不支持外带&#10;每日限量 · 售完为止"
+        maxlength="200" oninput="markUnsaved()"></textarea>
+      <span class="form-hint">每行一条，生成时 AI 会在合适位置自然融入</span>
+    </div>
+
+    <div class="form-group" style="margin-bottom:0">
+      <label class="form-label">写作语气</label>
+      <div class="pill-group">
+        <button class="pill-tag active" data-group="voiceTone" data-val="亲切温暖">亲切温暖</button>
+        <button class="pill-tag"        data-group="voiceTone" data-val="专业权威">专业权威</button>
+        <button class="pill-tag"        data-group="voiceTone" data-val="活泼有趣">活泼有趣</button>
+        <button class="pill-tag"        data-group="voiceTone" data-val="简洁克制">简洁克制</button>
+      </div>
+      <span class="form-hint">影响 AI 生成文案的整体语气风格</span>
+    </div>
+  </div>
+
+  <!-- ── AI 接口配置 Card ── -->
+  <div class="s-card">
+    <div class="s-card-title">🔑 AI 接口配置</div>
+
+    <div class="form-group">
+      <label class="form-label">选择接口</label>
+      <div class="provider-options">
+        <div class="provider-block selected" id="provider-doubao" onclick="selectProvider('doubao')">
+          <div class="provider-icon">🤖</div>
+          <div>
+            <div class="provider-name">豆包 Vision</div>
+            <div class="provider-desc">国内访问稳定，支持中文场景</div>
+          </div>
+        </div>
+        <div class="provider-block" id="provider-claude" onclick="selectProvider('claude')">
+          <div class="provider-icon">🧠</div>
+          <div>
+            <div class="provider-name">Claude Sonnet</div>
+            <div class="provider-desc">图片理解能力强，支持复杂排版</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom:0">
+      <label class="form-label">API Key</label>
+      <div class="apikey-row">
+        <input type="password" id="s-api-key"
+          placeholder="sk-xxxxxxxxxxxxxxxxxx"
+          oninput="onSettingsKeyInput(this.value)">
+        <button class="btn-toggle-key" id="toggle-key-btn" onclick="toggleKeyVisibility()">显示</button>
+      </div>
+      <div class="test-row">
+        <button class="btn-test" id="test-btn" onclick="testConnection()">测试连接</button>
+        <span class="test-status" id="test-status"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 使用统计 Card ── -->
+  <div class="s-card">
+    <div class="s-card-title">📊 使用统计</div>
+    <div class="stats-cols">
+      <div class="stats-col">
+        <span class="s-icon">📝</span>
+        <span class="s-num" id="s-stat-today">0</span>
+        <span class="s-lbl">今日生成</span>
+      </div>
+      <div class="stats-col">
+        <span class="s-icon">📅</span>
+        <span class="s-num" id="s-stat-month">0</span>
+        <span class="s-lbl">本月生成</span>
+      </div>
+      <div class="stats-col">
+        <span class="s-icon">📚</span>
+        <span class="s-num" id="s-stat-total">0</span>
+        <span class="s-lbl">历史总计</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Save Button -->
+  <button class="btn-save" onclick="saveSettings()">
+    <div class="unsaved-dot" id="unsaved-dot"></div>
+    <span id="save-btn-text">保存设置</span>
+  </button>
+
+</div>
+</div><!-- /page-settings -->
+
+
+<script src="scripts/storage.js"></script>
+<script src="scripts/imageUtils.js"></script>
+<script src="scripts/api.js"></script>
+<script src="scripts/promptBuilder.js"></script>
+<script src="scripts/render.js"></script>
+<script src="scripts/copy.js"></script>
+<script src="scripts/generate.js"></script>
+<script src="scripts/upload.js"></script>
+<script src="scripts/settings.js"></script>
+<script src="scripts/history.js"></script>
+<script src="scripts/main.js"></script>
+</body>
+</html>

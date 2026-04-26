@@ -1,0 +1,14 @@
+:root {
+  --black:           #1C1C1E;
+  --yellow:          #F5C518;
+  --bg-page:         #F2F2F0;
+  --bg-card:         #FFFFFF;
+  --bg-input:        #F7F7F5;
+  --text-primary:    #1C1C1E;
+  --text-secondary:  #8C8C8C;
+  --text-tertiary:   #BFBFBF;
+  --border:          #E8E8E4;
+  --success:         #34C759;
+  --error:           #FF3B30;
+  --wx-green:        #07C160;
+}
