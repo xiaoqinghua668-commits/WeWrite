@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="styles/article.css">
 <link rel="stylesheet" href="styles/settings.css">
 <link rel="stylesheet" href="styles/history.css">
+<link rel="stylesheet" href="styles/responsive.css">
 </head>
 <body>
 
@@ -88,15 +89,21 @@
           <span class="upload-sub">JPG · PNG · WebP，最多 6 张</span>
         </label>
         <div class="thumb-row" id="thumb-row"></div>
+        <div class="img-size-hint" id="img-size-hint"></div>
         <div class="img-desc-group form-group" id="img-desc-group" style="margin-top:8px">
           <label class="form-label" for="img-desc">图片描述（可选）</label>
           <textarea id="img-desc" placeholder="告诉 AI 图片内容，生成更贴切的配文..."></textarea>
         </div>
       </div>
 
+      <div class="gen-estimate" id="gen-estimate" style="display:none">
+        <span id="est-template"></span>
+        <span id="est-img"></span>
+      </div>
       <button class="btn-generate" id="generate-btn" onclick="generate()">
         <span id="btn-text">生成文案 ↗</span>
       </button>
+      <div class="shortcut-hint">⌘ Enter 快速生成</div>
 
     </div><!-- /input-card -->
 
@@ -272,6 +279,10 @@
         <button class="btn-test" id="test-btn" onclick="testConnection()">测试连接</button>
         <span class="test-status" id="test-status"></span>
       </div>
+      <div class="form-hint" style="margin-top:6px">
+        🔒 API Key 仅保存在本地浏览器，不会上传到任何服务器。
+        部署到公网后，请勿将工具链接分享给他人。
+      </div>
     </div>
   </div>
 
@@ -294,6 +305,10 @@
         <span class="s-num" id="s-stat-total">0</span>
         <span class="s-lbl">历史总计</span>
       </div>
+    </div>
+    <div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between">
+      <span class="form-hint" id="storage-hint"></span>
+      <button class="btn-clear-history" onclick="confirmClearHistory()">清空历史记录</button>
     </div>
   </div>
 

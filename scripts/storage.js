@@ -28,11 +28,49 @@ function loadHistory() {
   try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; }
   catch { return []; }
 }
+
+function checkStorageQuota() {
+  try {
+    let total = 0;
+    for (const key in localStorage) {
+      if (localStorage.hasOwnProperty(key)) {
+        total += localStorage.getItem(key).length * 2;
+      }
+    }
+    const usedMB  = (total / 1024 / 1024).toFixed(1);
+    const limitMB = 5;
+    const ratio   = total / (limitMB * 1024 * 1024);
+    return { usedMB: parseFloat(usedMB), ratio, isCritical: ratio > 0.8 };
+  } catch {
+    return { usedMB: 0, ratio: 0, isCritical: false };
+  }
+}
+
 function appendHistory(item) {
+  const quota = checkStorageQuota();
+  if (quota.isCritical) {
+    const trimmed = loadHistory().slice(0, 30);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(trimmed));
+  }
+
   const h = loadHistory();
   h.unshift(item);
   if (h.length > 100) h.splice(100);
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(h));
+
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(h));
+  } catch (e) {
+    h.splice(80);
+    try {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(h));
+    } catch {
+      console.warn('localStorage 已满，无法保存历史记录');
+    }
+  }
+}
+
+function clearAllHistory() {
+  localStorage.removeItem(HISTORY_KEY);
 }
 
 function extractTitle(html) {

@@ -1,3 +1,26 @@
+async function generateWithRetry(apiCfg, prompt, base64List, maxRetries = 2) {
+  let lastError;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    if (attempt > 0) {
+      setStatus(`第 ${attempt} 次重试中...`, 'loading');
+      await new Promise(r => setTimeout(r, 1500));
+    }
+    try {
+      if (apiCfg.type === 'claude') {
+        return await callClaude({ apiKey: apiCfg.key, prompt, images: base64List });
+      } else {
+        return await callDoubao({ apiKey: apiCfg.key, prompt, images: base64List });
+      }
+    } catch (err) {
+      lastError = err;
+      if (err.message && (err.message.includes('401') || err.message.includes('403'))) {
+        throw err;
+      }
+    }
+  }
+  throw lastError;
+}
+
 async function generate() {
   if (state.isLoading) return;
   if (!validateTopic()) return;
@@ -25,14 +48,9 @@ async function generate() {
   const base64List = state.images.map(img => img.base64);
 
   try {
-    let html;
-    if (apiCfg.type === 'claude') {
-      html = await callClaude({ apiKey: apiCfg.key, prompt, images: base64List });
-    } else {
-      html = await callDoubao({ apiKey: apiCfg.key, prompt, images: base64List });
-    }
+    const rawHtml = await generateWithRetry(apiCfg, prompt, base64List);
+    const html    = rawHtml.replace(/^```html\s*/i, '').replace(/\s*```$/i, '').trim();
 
-    html = html.replace(/^```html\s*/i, '').replace(/\s*```$/i, '').trim();
     state.generatedHTML = html;
     renderArticle(html);
 
@@ -90,4 +108,13 @@ function validateTopic() {
 function clearTopicError(el) {
   el.classList.remove('error');
   document.getElementById('topic-error').style.display = 'none';
+}
+
+function updateEstimate() {
+  const el = document.getElementById('gen-estimate');
+  if (!el) return;
+  document.getElementById('est-template').textContent = '预计 700~950 字';
+  document.getElementById('est-img').textContent =
+    state.images.length > 0 ? `${state.images.length} 张配图` : '';
+  el.style.display = 'flex';
 }

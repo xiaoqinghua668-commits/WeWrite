@@ -31,6 +31,7 @@ document.querySelectorAll('.pill-tag').forEach(tag => {
     tag.classList.add('active');
     if (group === 'template' || group === 'layout') {
       state[group] = tag.dataset.val;
+      if (group === 'template') updateEstimate();
     } else if (group === 'voiceTone') {
       state.settingsVoiceTone = tag.dataset.val;
       markUnsaved();
@@ -38,8 +39,38 @@ document.querySelectorAll('.pill-tag').forEach(tag => {
   });
 });
 
+function initKeyboardShortcuts() {
+  document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      const activePage = document.querySelector('.page.active');
+      if (activePage && activePage.id === 'page-create') {
+        e.preventDefault();
+        generate();
+      }
+    }
+
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      const activePage = document.querySelector('.page.active');
+      if (activePage && activePage.id === 'page-history') {
+        e.preventDefault();
+        document.getElementById('history-search').focus();
+      }
+    }
+
+    if (e.key === 'Escape') {
+      const searchEl = document.getElementById('history-search');
+      if (document.activeElement === searchEl) {
+        searchEl.value = '';
+        renderHistoryList('');
+        searchEl.blur();
+      }
+    }
+  });
+}
+
 (function init() {
   syncPhoneHeader();
+  renderPreviewEmpty();
   const apiCfg = loadApiConfig();
   const btn    = document.getElementById('generate-btn');
   btn.disabled = !apiCfg.key;
@@ -48,4 +79,5 @@ document.querySelectorAll('.pill-tag').forEach(tag => {
   initUpload();
   initSettings();
   initHistory();
+  initKeyboardShortcuts();
 })();

@@ -24,10 +24,24 @@ function stripTags(html) {
   return html.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
 }
 
+function flashCopySuccess(btnId) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  const orig   = btn.textContent;
+  const origBg = btn.style.background || '';
+  btn.textContent      = '✓ 已复制！';
+  btn.style.background = 'var(--success)';
+  btn.style.color      = '#fff';
+  setTimeout(() => {
+    btn.textContent      = orig;
+    btn.style.background = origBg;
+    btn.style.color      = '';
+  }, 2000);
+}
+
 async function copyRichText() {
   if (!state.generatedHTML) return;
   const styledHTML = buildStyledHTML(state.generatedHTML);
-  const btn = document.getElementById('copy-rich-btn');
   try {
     await navigator.clipboard.write([
       new ClipboardItem({
@@ -47,10 +61,8 @@ async function copyRichText() {
     sel.removeAllRanges();
     document.body.removeChild(tmp);
   }
-  const orig = btn.textContent;
-  btn.textContent = '✓ 已复制！';
+  flashCopySuccess('copy-rich-btn');
   setStatus('✓ 已复制到剪贴板，直接粘贴到公众号编辑器即可', 'success');
-  setTimeout(() => { btn.textContent = orig; }, 2000);
 }
 
 function copyHtmlSource() {

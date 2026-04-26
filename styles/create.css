@@ -137,6 +137,79 @@
 .btn-copy-html:active:not(:disabled) { transform: scale(0.98); }
 .btn-copy-html:disabled { opacity: 0.4; cursor: not-allowed; }
 
+/* 快捷键提示 */
+.shortcut-hint {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: 6px;
+}
+
+/* 生成预估信息 */
+.gen-estimate {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+.gen-estimate span {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  background: var(--bg-input);
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+/* 图片大小提示 */
+.img-size-hint {
+  font-size: 11px;
+  margin-top: 6px;
+  display: none;
+}
+
+/* 空状态引导 */
+.onboard-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 200px;
+  margin-bottom: 16px;
+}
+.onboard-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.step-num {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--yellow);
+  color: var(--black);
+  font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.step-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-align: left;
+}
+.btn-go-settings {
+  padding: 8px 20px;
+  border-radius: 999px;
+  border: 1.5px solid var(--black);
+  background: transparent;
+  color: var(--black);
+  font-size: 13px; font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+.btn-go-settings:hover {
+  background: var(--black);
+  color: #fff;
+}
+
 /* Status Bar */
 .status-bar {
   width: 100%; height: 32px;

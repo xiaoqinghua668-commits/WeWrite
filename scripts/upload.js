@@ -10,12 +10,17 @@ async function addFiles(files) {
     setStatus(`最多上传 6 张图片，已跳过多余的 ${files.length - remaining} 张`, 'error');
   renderThumbs();
   toggleImgDesc();
+  updateEstimate();
+  updateImageSizeHint();
 }
 
 function removeImage(i) {
   if (state.images[i]._thumbUrl) URL.revokeObjectURL(state.images[i]._thumbUrl);
   state.images.splice(i, 1);
-  renderThumbs(); toggleImgDesc();
+  renderThumbs();
+  toggleImgDesc();
+  updateEstimate();
+  updateImageSizeHint();
 }
 
 function renderThumbs() {
@@ -31,6 +36,23 @@ function renderThumbs() {
 
 function toggleImgDesc() {
   document.getElementById('img-desc-group').classList.toggle('visible', state.images.length > 0);
+}
+
+function updateImageSizeHint() {
+  const hint = document.getElementById('img-size-hint');
+  if (!hint) return;
+  if (state.images.length === 0) { hint.textContent = ''; hint.style.display = 'none'; return; }
+  const bytes = estimateTotalSize(state.images);
+  const mb    = bytes / 1024 / 1024;
+  if (mb < 2) { hint.textContent = ''; hint.style.display = 'none'; return; }
+  hint.style.display = 'block';
+  if (mb > 4) {
+    hint.textContent = '图片较大，建议删除部分图片以提升速度';
+    hint.style.color = 'var(--error)';
+  } else {
+    hint.textContent = `图片共约 ${mb.toFixed(1)}MB，生成可能稍慢`;
+    hint.style.color = 'var(--warning, #f5a623)';
+  }
 }
 
 function initUpload() {

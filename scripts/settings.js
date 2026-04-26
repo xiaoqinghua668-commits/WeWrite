@@ -128,6 +128,7 @@ function populateSettingsForm() {
   document.getElementById('unsaved-dot').classList.remove('visible');
   document.getElementById('test-status').textContent = '';
   document.getElementById('test-status').className   = 'test-status';
+  updateStorageHint();
 }
 
 function saveSettings() {
@@ -156,6 +157,28 @@ function saveSettings() {
   const btn = document.getElementById('save-btn-text');
   btn.textContent = '✓ 已保存';
   setTimeout(() => { btn.textContent = '保存设置'; }, 2000);
+}
+
+function updateStorageHint() {
+  const quota = checkStorageQuota();
+  const hint  = document.getElementById('storage-hint');
+  if (!hint) return;
+  hint.textContent = `已使用约 ${quota.usedMB}MB / 5MB`;
+  hint.style.color = quota.isCritical ? 'var(--error)' : 'var(--text-tertiary)';
+}
+
+function confirmClearHistory() {
+  const btn = document.querySelector('.btn-clear-history');
+  if (!btn) return;
+  btn.innerHTML = `确认清空？
+    <button onclick="doCleanHistory()" style="color:var(--error);background:none;border:none;cursor:pointer;font-family:inherit;font-size:12px;">确认</button>
+    <button onclick="populateSettingsForm()" style="color:var(--text-secondary);background:none;border:none;cursor:pointer;font-family:inherit;font-size:12px;">取消</button>`;
+}
+
+function doCleanHistory() {
+  clearAllHistory();
+  updateNavStats();
+  populateSettingsForm();
 }
 
 function initSettings() {

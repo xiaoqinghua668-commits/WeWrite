@@ -1,0 +1,42 @@
+/* ═══════════════════════════════════════════
+   Responsive — 平板适配（768px ~ 1024px）
+═══════════════════════════════════════════ */
+@media (max-width: 1024px) {
+
+  .create-main {
+    grid-template-columns: 1fr;
+    padding: 16px 16px 0;
+  }
+
+  .preview-area {
+    padding-bottom: 24px;
+  }
+
+  .history-main {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+
+  .settings-view {
+    padding: 20px 16px 32px;
+  }
+
+  .nav-right {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .nav-tab {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+
+  .color-picker-row {
+    flex-wrap: wrap;
+  }
+
+  .provider-options {
+    grid-template-columns: 1fr;
+  }
+}
