@@ -28,6 +28,15 @@ async function generate() {
   setLoading(true);
   setStatus('AI 正在识别图片并撰写文案，请稍候...', 'loading');
 
+  setStreamCallback((partialHtml) => {
+    const cleaned = partialHtml.replace(/^```html\s*/i, '').replace(/\s*```$/i, '').trim();
+    try {
+      renderArticle(cleaned);
+    } catch (e) {
+      // 部分 HTML 渲染失败是正常的，等内容更完整后会成功
+    }
+  });
+
   const prompt     = buildPrompt({
     topic: state.topic, extra: state.extra,
     template: state.template, layout: state.layout,
@@ -63,6 +72,7 @@ async function generate() {
     setStatus(`✗ 生成失败：${err.message || '网络错误'}，请稍后重试`, 'error');
   }
 
+  setStreamCallback(null);
   setLoading(false);
 }
 

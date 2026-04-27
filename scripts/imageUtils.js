@@ -1,8 +1,8 @@
 async function compressImage(file, options = {}) {
   const {
-    maxPx    = 1024,
-    quality  = 0.82,
-    maxBytes = 300_000,
+    maxPx    = 800,
+    quality  = 0.7,
+    maxBytes = 150_000,
   } = options;
 
   return new Promise((resolve) => {
