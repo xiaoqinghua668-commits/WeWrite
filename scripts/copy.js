@@ -1,23 +1,39 @@
 function buildStyledHTML(html) {
-  return `<div style="font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;font-size:15px;line-height:1.9;color:#333;max-width:677px;margin:0 auto;">${
-    html
-      .replace(/class="art-title"/g,
-        'style="font-size:20px;font-weight:700;color:#1a1a1a;line-height:1.4;margin-bottom:6px;"')
-      .replace(/class="art-meta"/g,
-        'style="font-size:11px;color:#999;padding-bottom:10px;border-bottom:1px solid #f0f0f0;margin-bottom:12px;"')
-      .replace(/<h2>/g,
-        '<h2 style="font-size:16px;font-weight:700;color:#1a1a1a;margin:16px 0 7px;padding-left:8px;border-left:3px solid #07C160;">')
-      .replace(/<p>/g,
-        '<p style="font-size:14px;line-height:1.9;color:#333;margin:0 0 10px;">')
-      .replace(/<ul>/g,
-        '<ul style="padding-left:4px;list-style:none;margin:0 0 10px;">')
-      .replace(/<li>/g,
-        '<li style="font-size:14px;line-height:1.8;margin-bottom:6px;">')
-      .replace(/class="hl"/g,
-        'style="background:#f0faf5;border-left:3px solid #07C160;padding:10px 12px;margin:12px 0;border-radius:0 6px 6px 0;font-size:13px;color:#1a5c34;font-style:italic;"')
-      .replace(/class="cta"/g,
-        'style="background:#07C160;color:#fff;text-align:center;padding:12px;border-radius:8px;margin:14px 0;font-size:14px;font-weight:600;"')
-  }</div>`;
+  let styled = html
+    .replace(/class="art-title"/g,
+      'style="font-size:20px;font-weight:700;color:#1a1a1a;line-height:1.4;margin-bottom:6px;"')
+    .replace(/class="art-meta"/g,
+      'style="font-size:11px;color:#999;padding-bottom:10px;border-bottom:1px solid #f0f0f0;margin-bottom:12px;"')
+    .replace(/<h2>/g,
+      '<h2 style="font-size:16px;font-weight:700;color:#1a1a1a;margin:16px 0 7px;padding-left:8px;border-left:3px solid #07C160;">')
+    .replace(/<p>/g,
+      '<p style="font-size:14px;line-height:1.9;color:#333;margin:0 0 10px;">')
+    .replace(/<ul>/g,
+      '<ul style="padding-left:4px;list-style:none;margin:0 0 10px;">')
+    .replace(/<li>/g,
+      '<li style="font-size:14px;line-height:1.8;margin-bottom:6px;">')
+    .replace(/class="hl"/g,
+      'style="background:#f0faf5;border-left:3px solid #07C160;padding:10px 12px;margin:12px 0;border-radius:0 6px 6px 0;font-size:13px;color:#1a5c34;font-style:italic;"')
+    .replace(/class="cta"/g,
+      'style="background:#07C160;color:#fff;text-align:center;padding:12px;border-radius:8px;margin:14px 0;font-size:14px;font-weight:600;"');
+
+  let imgIndex = 0;
+  styled = styled.replace(/<img[^>]*>/gi, (match) => {
+    imgIndex++;
+    const altMatch = match.match(/alt="[^"]*?(\d+)[^"]*"/i);
+    const idxMatch = match.match(/data-idx="(\d+)"/i);
+    const num = altMatch ? altMatch[1] : (idxMatch ? idxMatch[1] : imgIndex);
+    return buildImagePlaceholder(num);
+  });
+
+  styled = styled.replace(/<div[^>]*class="imgph"[^>]*data-idx="(\d+)"[^>]*>[\s\S]*?<\/div>/gi,
+    (match, num) => buildImagePlaceholder(num));
+
+  return `<div style="font-family:'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;font-size:15px;line-height:1.9;color:#333;max-width:677px;margin:0 auto;">${styled}</div>`;
+}
+
+function buildImagePlaceholder(num) {
+  return `<div style="background:#FFF9E6;border:2px dashed #F5C518;border-radius:8px;padding:16px;text-align:center;margin:12px 0;color:#B8860B;font-size:14px;font-weight:600;">📷 请在此处插入第 ${num} 张图片</div>`;
 }
 
 function stripTags(html) {
