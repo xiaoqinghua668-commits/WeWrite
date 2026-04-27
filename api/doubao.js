@@ -1,4 +1,3 @@
-const MODEL   = 'doubao-1.5-vision-pro-250328';
 const API_URL = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
 
 module.exports = async function handler(req, res) {
@@ -9,6 +8,11 @@ module.exports = async function handler(req, res) {
   const apiKey = process.env.DOUBAO_API_KEY;
   if (!apiKey) {
     return res.status(500).json({ error: { message: '服务端未配置 DOUBAO_API_KEY 环境变量' } });
+  }
+
+  const model = process.env.DOUBAO_MODEL;
+  if (!model) {
+    return res.status(500).json({ error: { message: '服务端未配置 DOUBAO_MODEL 环境变量，请填入接入点 ID（ep-xxx）或已开通按量计费的模型名' } });
   }
 
   const { prompt, images = [], testMode = false } = req.body;
@@ -29,7 +33,7 @@ module.exports = async function handler(req, res) {
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: MODEL,
+        model: model,
         max_tokens: testMode ? 10 : 2000,
         messages: [{ role: 'user', content }],
       }),
