@@ -6,5 +6,5 @@ async function callDoubao({ prompt, images = [], testMode = false }) {
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error?.message || '请求失败');
-  return data.choices[0].message.content;
+  return data.output[0].content[0].text;
 }
