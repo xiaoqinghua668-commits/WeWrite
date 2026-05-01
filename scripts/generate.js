@@ -19,29 +19,50 @@ async function generateWithRetry(prompt, base64List, maxRetries = 2) {
 
 async function generate() {
   if (state.isLoading) return;
-  if (!validateTopic()) return;
 
-  state.topic   = document.getElementById('topic').value.trim();
-  state.extra   = document.getElementById('extra').value.trim();
+  if (state.mode === 'create') {
+    if (!validateTopic()) return;
+    state.topic   = document.getElementById('topic').value.trim();
+    state.extra   = document.getElementById('extra').value.trim();
+  } else {
+    state.polishDraft = document.getElementById('polish-draft').value.trim();
+    if (!state.polishDraft) {
+      document.getElementById('polish-draft').classList.add('error');
+      return;
+    }
+    document.getElementById('polish-draft').classList.remove('error');
+  }
+
   state.imgDesc = document.getElementById('img-desc').value.trim();
 
   setLoading(true);
-  setStatus('AI 正在识别图片并撰写文案，请稍候...', 'loading');
+  setStatus(
+    state.mode === 'create'
+      ? 'AI 正在识别图片并撰写文案，请稍候...'
+      : 'AI 正在润色排版，请稍候...',
+    'loading'
+  );
 
   setStreamCallback((partialHtml) => {
     const cleaned = partialHtml.replace(/^```html\s*/i, '').replace(/\s*```$/i, '').trim();
-    try {
-      renderArticle(cleaned);
-    } catch (e) {
-      // 部分 HTML 渲染失败是正常的，等内容更完整后会成功
-    }
+    try { renderArticle(cleaned); } catch (e) {}
   });
 
-  const prompt     = buildPrompt({
-    topic: state.topic, extra: state.extra,
-    template: state.template, layout: state.layout,
-    imgCount: state.images.length, imgDesc: state.imgDesc,
-  });
+  const prompt = state.mode === 'create'
+    ? buildPrompt({
+        topic: state.topic, extra: state.extra,
+        template: state.template, layout: state.layout,
+        imgCount: state.images.length, imgDesc: state.imgDesc,
+        selectedStyle: state.selectedStyle,
+      })
+    : buildPolishPrompt({
+        draft: state.polishDraft,
+        level: state.polishLevel,
+        preserve: state.polishPreserve,
+        imgCount: state.images.length, imgDesc: state.imgDesc,
+        selectedStyle: state.selectedStyle,
+      });
+
   const base64List = state.images.map(img => img.base64);
 
   try {
@@ -57,13 +78,15 @@ async function generate() {
 
     const brand = loadBrand();
     appendHistory({
-      id:        `${Date.now()}-${Math.random().toString(36).slice(2,7)}`,
-      title:     extractTitle(html),
-      topic:     state.topic,
-      template:  state.template,
+      id:          `${Date.now()}-${Math.random().toString(36).slice(2,7)}`,
+      title:       extractTitle(html),
+      topic:       state.mode === 'create' ? state.topic : state.polishDraft.slice(0, 50),
+      template:    state.mode === 'create' ? state.template : null,
+      mode:        state.mode,
+      polishDraft: state.mode === 'polish' ? state.polishDraft : undefined,
       html,
-      createdAt: new Date().toISOString(),
-      brandName: brand.name || '',
+      createdAt:   new Date().toISOString(),
+      brandName:   brand.name || '',
     });
     updateNavStats();
 
@@ -79,10 +102,13 @@ async function generate() {
 function setLoading(v) {
   state.isLoading = v;
   const btn = document.getElementById('generate-btn');
-  btn.disabled  = v;
-  btn.innerHTML = v
-    ? '<div class="spinner"></div><span>生成中...</span>'
-    : '<span id="btn-text">生成文案 ↗</span>';
+  btn.disabled = v;
+  if (v) {
+    btn.innerHTML = '<div class="spinner"></div><span>生成中...</span>';
+  } else {
+    const label = state.mode === 'polish' ? '润色排版 ↗' : '生成文案 ↗';
+    btn.innerHTML = `<span id="btn-text">${label}</span>`;
+  }
 }
 
 function setStatus(msg, type = '') {

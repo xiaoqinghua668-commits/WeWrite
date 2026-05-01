@@ -77,3 +77,23 @@ function extractTitle(html) {
   const m = html.match(/<div[^>]*class="art-title"[^>]*>([\s\S]*?)<\/div>/i);
   return m ? m[1].replace(/<[^>]*>/g, '').trim() : '';
 }
+
+// ── 风格库 ────────────────────────────────
+const STYLES_KEY = 'wechat_tool_styles';
+
+function loadStyles() {
+  try { return JSON.parse(localStorage.getItem(STYLES_KEY)) || []; }
+  catch { return []; }
+}
+
+function saveStyle(styleCard) {
+  const styles = loadStyles();
+  styles.unshift(styleCard);
+  if (styles.length > 10) styles.splice(10);
+  localStorage.setItem(STYLES_KEY, JSON.stringify(styles));
+}
+
+function deleteStyle(id) {
+  const styles = loadStyles().filter(s => s.id !== id);
+  localStorage.setItem(STYLES_KEY, JSON.stringify(styles));
+}

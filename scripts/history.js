@@ -95,17 +95,18 @@ function renderHistoryList(keyword) {
 }
 
 function renderHistoryItem(item) {
-  const title   = item.title || '（无标题）';
-  const topic   = item.topic ? (item.topic.length > 20 ? item.topic.slice(0, 20) + '...' : item.topic) : '';
-  const time    = formatTime(item.createdAt);
-  const emoji   = getTemplateEmoji(item.template);
-  const isEmpty = !item.title;
+  const title     = item.title || '（无标题）';
+  const topic     = item.topic ? (item.topic.length > 20 ? item.topic.slice(0, 20) + '...' : item.topic) : '';
+  const time      = formatTime(item.createdAt);
+  const emoji     = item.mode === 'polish' ? '✏️' : getTemplateEmoji(item.template);
+  const isEmpty   = !item.title;
+  const modeBadge = item.mode === 'polish' ? '<span class="mode-badge">润色</span>' : '';
 
   return `
     <div class="history-item" data-id="${item.id}" onclick="selectHistoryItem('${item.id}')">
       <div class="history-item-icon">${emoji}</div>
       <div class="history-item-body">
-        <div class="history-item-title ${isEmpty ? 'empty' : ''}">${title}</div>
+        <div class="history-item-title ${isEmpty ? 'empty' : ''}">${title}${modeBadge}</div>
         <div class="history-item-topic">${topic}</div>
       </div>
       <div class="history-item-time">${time}</div>
@@ -176,18 +177,32 @@ function reuseHistoryItem(id) {
   const item    = history.find(i => i.id === id);
   if (!item) return;
 
-  document.getElementById('topic').value = item.topic || '';
-
-  if (item.template) {
-    document.querySelectorAll('.pill-tag[data-group="template"]').forEach(t => {
-      t.classList.toggle('active', t.dataset.val === item.template);
-    });
-    state.template = item.template;
+  if (item.mode === 'polish') {
+    switchMode('polish');
+    if (item.polishDraft) {
+      document.getElementById('polish-draft').value = item.polishDraft;
+      state.polishDraft = item.polishDraft;
+    }
+  } else {
+    switchMode('create');
+    document.getElementById('topic').value = item.topic || '';
+    if (item.template) {
+      document.querySelectorAll('.pill-tag[data-group="template"]').forEach(t => {
+        t.classList.toggle('active', t.dataset.val === item.template);
+      });
+      state.template = item.template;
+    }
   }
 
   switchTab('create');
-  setStatus('已载入历史文章，修改主题后重新生成', 'info');
-  setTimeout(() => document.getElementById('topic').focus(), 300);
+  setStatus('已载入历史文章，修改内容后重新生成', 'info');
+  setTimeout(() => {
+    if (item.mode === 'polish') {
+      document.getElementById('polish-draft').focus();
+    } else {
+      document.getElementById('topic').focus();
+    }
+  }, 300);
 }
 
 function confirmDeleteHistory(id) {
